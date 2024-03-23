@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Notes and tempfiles
+temp 
+temp.txt
+notes.md 
+notes 
