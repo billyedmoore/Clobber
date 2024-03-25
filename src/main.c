@@ -79,3 +79,30 @@ Command parse_command(char *line) {
   Command cmd = {args, i};
   return cmd;
 }
+
+int builtin_cd(Command cmd) {
+  /***
+   * Builtin "cd" command to change the current working directory.
+   *
+   * Input:
+   *  Command cmd: The command made up of the argumentss (including "cd" as the
+   *  first value) and the count.
+   * Output:
+   *  int exit_code : See run_command for details.
+   */
+  if (cmd.count <= 1) {
+    printf("Not enough arguements silly.");
+    return 2;
+  } else {
+    int changed = chdir(cmd.arguments[1]);
+
+    switch (changed) {
+    case 0:
+      return 0;
+    case -1:
+      return 1;
+    default:
+      return 1;
+    }
+  }
+}
