@@ -18,31 +18,42 @@ struct built_in_func_t {
 };
 
 typedef struct built_in_func_t built_in_func;
-
+int main_loop();
 int run_command(Command cmd);
 Command parse_command(char *line);
 
 // Builtins
 int builtin_cd(Command cmd);
+int builtin_exit(Command cmd);
 
 int main(int argc, char **argv) {
   /***
    * The main function.
    */
   if (isatty(STDIN_FILENO)) {
-    char *line = malloc(100 * sizeof(char));
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
-
-    printf("(%s) >", cwd);
-    fgets(line, 100, stdin);
-    Command cmd = parse_command(line);
-    run_command(cmd);
-
-    free(cmd.arguments);
+    while (1) {
+      main_loop();
+    }
   } else {
     printf("We are in a script or are we?\n");
   }
+}
+
+int main_loop() {
+  /***
+   * Run one command.
+   */
+  char *line = malloc(100 * sizeof(char));
+  char cwd[PATH_MAX];
+  getcwd(cwd, sizeof(cwd));
+
+  printf("(%s) >", cwd);
+  fgets(line, 100, stdin);
+  Command cmd = parse_command(line);
+  int exit_code = run_command(cmd);
+
+  free(cmd.arguments);
+  return exit_code;
 }
 
 int run_command(Command cmd) {
@@ -55,11 +66,14 @@ int run_command(Command cmd) {
    * Output:
    *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
    */
-  built_in_func builtins[1];
+  built_in_func builtins[2];
 
   // Define the builtins.
   builtins[0].func = &builtin_cd;
   builtins[0].name = "cd";
+
+  builtins[1].func = &builtin_exit;
+  builtins[1].name = "exit";
 
   // If the command is empty.
   if (cmd.count == 0) {
@@ -134,3 +148,5 @@ int builtin_cd(Command cmd) {
     }
   }
 }
+
+int builtin_exit(Command cmd) { exit(0); }
