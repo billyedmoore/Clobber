@@ -11,8 +11,18 @@ struct command {
 
 typedef struct command Command;
 
+struct built_in_func_t {
+  int (*func)(Command cmd);
+  char *name;
+};
+
+typedef struct built_in_func_t built_in_func;
+
 int run_command(Command cmd);
 Command parse_command(char *line);
+
+// Builtins
+int builtin_cd(Command cmd);
 
 int main(int argc, char **argv) {
   /***
@@ -24,7 +34,6 @@ int main(int argc, char **argv) {
     fgets(line, 100, stdin);
     Command cmd = parse_command(line);
     run_command(cmd);
-    printf("%i\n", cmd.count);
 
     free(cmd.arguments);
   } else {
@@ -42,12 +51,27 @@ int run_command(Command cmd) {
    * Output:
    *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
    */
+  built_in_func builtins[1];
+
+  // Define the builtins.
+  builtins[0].func = &builtin_cd;
+  builtins[0].name = "cd";
 
   // If the command is empty.
   if (cmd.count == 0) {
     printf("Enter a command.");
     return 2;
   }
+
+  for (int i = 0; i < (sizeof(builtins) / sizeof(built_in_func)); i++) {
+    if (strcmp(builtins[i].name, cmd.arguments[0]) == 0) {
+      return builtins[i].func(cmd);
+    }
+  }
+
+  // If we haven't run a command then command not found.
+  printf("Command \"%s\" not found.\n", cmd.arguments[0]);
+
   return 1;
 }
 
