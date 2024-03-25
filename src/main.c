@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,6 +63,7 @@ int main_loop() {
   Command cmd = parse_command(line);
   int exit_code = run_command(cmd);
 
+  free(line);
   free(cmd.arguments);
   return exit_code;
 }
@@ -100,7 +102,18 @@ int run_command(Command cmd) {
     return 1;
   case 0:
     // Child
-    execvp(cmd.arguments[0], cmd.arguments);
+    if (execvp(cmd.arguments[0], cmd.arguments) == -1) {
+      switch (errno) {
+      case (2):
+        fprintf(stderr, "Program \"%s\" not found\n", cmd.arguments[0]);
+        break;
+      case (13):
+        fprintf(stderr, "Permission denied\n");
+        break;
+      default:
+        fprintf(stderr, "Couldn't execute %i\n", errno);
+      }
+    }
     exit(1);
   default:
     // parent
@@ -148,10 +161,9 @@ int builtin_cd(Command cmd) {
    * Builtin "cd" command to change the current working directory.
    *
    * Input:
-   *  Command cmd: The command made up of the argumentss (including "cd" as the
-   *  first value) and the count.
-   * Output:
-   *  int exit_code : See run_command for details.
+   *  Command cmd: The command made up of the argumentss (including "cd" as
+   * the first value) and the count. Output: int exit_code : See run_command
+   * for details.
    */
   if (cmd.count <= 1) {
     printf("Not enough arguements silly.");
