@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 // Structure to store a command.
@@ -82,10 +83,29 @@ int run_command(Command cmd) {
     return 2;
   }
 
+  // Compare the first argument with each builtin function.
+  // If they match execute the builtin.
+  // Won't scale well if too many builtins.
   for (int i = 0; i < (sizeof(builtins) / sizeof(built_in_func)); i++) {
     if (strcmp(builtins[i].name, cmd.arguments[0]) == 0) {
       return builtins[i].func(cmd);
     }
+  }
+
+  pid_t pid = fork();
+  switch (pid) {
+  case -1:
+    // Failed to fork
+    printf("Couldn't fork.");
+    return 1;
+  case 0:
+    // Child
+    execvp(cmd.arguments[0], cmd.arguments);
+    exit(1);
+  default:
+    // parent
+    wait(NULL);
+    return 0;
   }
 
   // If we haven't run a command then command not found.
