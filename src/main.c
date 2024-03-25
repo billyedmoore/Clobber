@@ -111,7 +111,8 @@ int run_command(Command cmd) {
         fprintf(stderr, "Permission denied\n");
         break;
       default:
-        fprintf(stderr, "Couldn't execute %i\n", errno);
+        fprintf(stderr, "Couldn't execute %s due to %s\n", cmd.arguments[0],
+                strerror(errno));
       }
     }
     exit(1);
