@@ -12,7 +12,7 @@ struct command {
 typedef struct command Command;
 
 int run_command(Command cmd);
-struct command parse_command(char *line);
+Command parse_command(char *line);
 
 int main(int argc, char **argv) {
   /***
@@ -51,7 +51,7 @@ int run_command(Command cmd) {
   return 1;
 }
 
-struct command parse_command(char *line) {
+Command parse_command(char *line) {
   /***
    * Parse a command into a "list" of arguments of type char**.
    * Allocates memory up to a bufsize.
