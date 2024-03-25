@@ -26,10 +26,19 @@ Command parse_command(char *line);
 int builtin_cd(Command cmd);
 int builtin_exit(Command cmd);
 
+built_in_func builtins[2];
+
 int main(int argc, char **argv) {
   /***
    * The main function.
    */
+
+  // Define the builtins.
+  builtins[0].func = &builtin_cd;
+  builtins[0].name = "cd";
+
+  builtins[1].func = &builtin_exit;
+  builtins[1].name = "exit";
   if (isatty(STDIN_FILENO)) {
     while (1) {
       main_loop();
@@ -66,14 +75,6 @@ int run_command(Command cmd) {
    * Output:
    *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
    */
-  built_in_func builtins[2];
-
-  // Define the builtins.
-  builtins[0].func = &builtin_cd;
-  builtins[0].name = "cd";
-
-  builtins[1].func = &builtin_exit;
-  builtins[1].name = "exit";
 
   // If the command is empty.
   if (cmd.count == 0) {
