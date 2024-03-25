@@ -1,3 +1,3 @@
 #! /bin/bash
-gcc clobber.c
-./a.out
+gcc src/main.c -o clobber.out
+./clobber.out
