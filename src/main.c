@@ -1,3 +1,4 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,10 @@ int main(int argc, char **argv) {
    */
   if (isatty(STDIN_FILENO)) {
     char *line = malloc(100 * sizeof(char));
-    printf("Hey >");
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+
+    printf("(%s) >", cwd);
     fgets(line, 100, stdin);
     Command cmd = parse_command(line);
     run_command(cmd);
