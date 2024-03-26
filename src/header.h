@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define NUMBER_BUILTINS 3
+
 #define FONT_COLOUR_RESET "\x1b[0m"
 #define FONT_CYAN "\e[1;96m"
 #define FONT_GREEN "\e[0;92m"
@@ -31,8 +33,8 @@ struct built_in_func_t {
 
 typedef struct built_in_func_t built_in_func;
 
-int main_loop();
-int run_command(Command cmd);
+int main_loop(built_in_func builtins[]);
+int run_command(Command cmd, built_in_func builtins[]);
 Command parse_command(char *line);
 
 // Builtins

@@ -1,11 +1,10 @@
 #include "header.h"
 
-built_in_func builtins[3];
-
 int main(int argc, char **argv) {
   /***
    * The main function.
    */
+  built_in_func builtins[NUMBER_BUILTINS];
 
   // Define the builtins.
   builtins[0].func = &builtin_cd;
@@ -19,14 +18,14 @@ int main(int argc, char **argv) {
 
   if (isatty(STDIN_FILENO)) {
     while (1) {
-      main_loop();
+      main_loop(builtins);
     }
   } else {
     printf("We are in a script or are we?\n");
   }
 }
 
-int main_loop() {
+int main_loop(built_in_func builtins[]) {
   /***
    * Run one command.
    */
@@ -37,20 +36,21 @@ int main_loop() {
   printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
   fgets(line, 100, stdin);
   Command cmd = parse_command(line);
-  int exit_code = run_command(cmd);
+  int exit_code = run_command(cmd, builtins);
 
   free(line);
   free(cmd.arguments);
   return exit_code;
 }
 
-int run_command(Command cmd) {
+int run_command(Command cmd, built_in_func builtins[]) {
   /***
    * Run a command.
    *
    * Input:
    *  Command cmd: The command to be executed, made up of the arguments and
    *  number of arguments.
+   *  built_in_func[] builtins: The builtin functions that can be used.
    * Output:
    *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
    */
@@ -64,7 +64,7 @@ int run_command(Command cmd) {
   // Compare the first argument with each builtin function.
   // If they match execute the builtin.
   // Won't scale well if too many builtins.
-  for (int i = 0; i < (sizeof(builtins) / sizeof(built_in_func)); i++) {
+  for (int i = 0; i < NUMBER_BUILTINS; i++) {
     if (strcmp(builtins[i].name, cmd.arguments[0]) == 0) {
       return builtins[i].func(cmd);
     }
