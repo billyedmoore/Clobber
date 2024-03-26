@@ -1,5 +1,9 @@
 #include "header.h"
 
+/***
+ * Functions for builtin commands.
+ */
+
 int builtin_cd(Command cmd) {
   /***
    * Builtin "cd" command to change the current working directory.
