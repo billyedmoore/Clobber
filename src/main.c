@@ -6,6 +6,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define FONT_COLOUR_RESET "\x1b[0m"
+#define FONT_CYAN "\e[1;96m"
+#define FONT_GREEN "\e[0;92m"
+
 // Structure to store a command.
 struct command {
   char **arguments;
@@ -58,7 +62,7 @@ int main_loop() {
   char cwd[PATH_MAX];
   getcwd(cwd, sizeof(cwd));
 
-  printf("(%s) >", cwd);
+  printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
   fgets(line, 100, stdin);
   Command cmd = parse_command(line);
   int exit_code = run_command(cmd);
