@@ -31,8 +31,9 @@ Command parse_command(char *line);
 // Builtins
 int builtin_cd(Command cmd);
 int builtin_exit(Command cmd);
+int builtin_help(Command cmd);
 
-built_in_func builtins[2];
+built_in_func builtins[3];
 
 int main(int argc, char **argv) {
   /***
@@ -45,6 +46,9 @@ int main(int argc, char **argv) {
 
   builtins[1].func = &builtin_exit;
   builtins[1].name = "exit";
+
+  builtins[2].func = &builtin_help;
+  builtins[2].name = "help";
   if (isatty(STDIN_FILENO)) {
     while (1) {
       main_loop();
@@ -188,3 +192,22 @@ int builtin_cd(Command cmd) {
 }
 
 int builtin_exit(Command cmd) { exit(0); }
+
+int builtin_help(Command cmd) {
+  /***
+   * Builtin "help" command.
+   * Input:
+   *  Command cmd: Not yet used, may be used to parse arguments in the future.
+   * Output:
+   *  int exit_code see execute command for details.
+   */
+  printf("Welcome to Clobber.\n");
+  printf("Like any shell you can run anything in your path.\n");
+  printf("There are three builtins \"cd\" \"help\" \"exit\".\n");
+  printf("Append & to any command to have it run in the background.\n");
+  printf("Hoping to add redirection and piping in the future.\n");
+  printf("This is an educational exercise so it is pretty simple and usability "
+         "is limited.\n");
+
+  return 0;
+}
