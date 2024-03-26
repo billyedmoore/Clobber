@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <linux/limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 struct command {
   char **arguments;
   int count;
+  bool background;
 };
 
 typedef struct command Command;
@@ -81,7 +83,7 @@ int run_command(Command cmd) {
 
   // If the command is empty.
   if (cmd.count == 0) {
-    printf("Enter a command.");
+    printf("Enter a command.\n");
     return 2;
   }
 
@@ -98,11 +100,12 @@ int run_command(Command cmd) {
   switch (pid) {
   case -1:
     // Failed to fork
-    printf("Couldn't fork.");
+    printf("Couldn't fork.\n");
     return 1;
-  case 0:
+  case 0: {
     // Child
-    if (execvp(cmd.arguments[0], cmd.arguments) == -1) {
+    int exit_code = execvp(cmd.arguments[0], cmd.arguments);
+    if (exit_code == -1) {
       switch (errno) {
       case (2):
         fprintf(stderr, "Program \"%s\" not found\n", cmd.arguments[0]);
@@ -113,12 +116,17 @@ int run_command(Command cmd) {
       default:
         fprintf(stderr, "Couldn't execute %s due to %s\n", cmd.arguments[0],
                 strerror(errno));
+        break;
       }
     }
     exit(1);
+    break;
+  }
   default:
     // parent
-    wait(NULL);
+    if (!cmd.background) {
+      wait(NULL);
+    }
     return 0;
   }
 
@@ -151,9 +159,19 @@ Command parse_command(char *line) {
     args[i] = token;
     i++;
   }
+
+  bool background = false;
+
+  // If there is one or more arguments and the last is "&" run in background.
+  if (i > 0 && strcmp(args[i - 1], "&") == 0) {
+    background = true;
+    i -= 1;
+    args[i] = NULL; // remove "&" from the arguements.
+  }
   // Reallocate memory so only the amount needed is allocated.
-  args = realloc(args, (i + 1) * sizeof(char *));
-  Command cmd = {args, i};
+  args = realloc(args, (i) * sizeof(char *));
+  Command cmd = {args, i, background};
+
   return cmd;
 }
 
@@ -167,7 +185,7 @@ int builtin_cd(Command cmd) {
    * for details.
    */
   if (cmd.count <= 1) {
-    printf("Not enough arguements silly.");
+    printf("Not enough arguements silly.\n");
     return 2;
   } else {
     int changed = chdir(cmd.arguments[1]);
