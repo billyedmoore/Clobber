@@ -11,10 +11,14 @@
 #include <unistd.h>
 
 #define NUMBER_BUILTINS 3
+#define MAX_BACKGROUND 30
 
 #define FONT_COLOUR_RESET "\x1b[0m"
 #define FONT_CYAN "\e[1;96m"
 #define FONT_GREEN "\e[0;92m"
+
+extern pid_t background_processes[10];
+extern int number_alive_background_processes;
 
 // Structure to store a command.
 struct command {
@@ -41,5 +45,8 @@ Command parse_command(char *line);
 int builtin_cd(Command cmd);
 int builtin_exit(Command cmd);
 int builtin_help(Command cmd);
+
+// Signal handlers
+void handle_sigchld(int signum);
 
 #endif

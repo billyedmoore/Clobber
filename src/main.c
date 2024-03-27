@@ -1,5 +1,8 @@
 #include "header.h"
 
+pid_t background_processes[MAX_BACKGROUND];
+int number_alive_background_processes = 0;
+
 int main(int argc, char **argv) {
   /***
    * The main function.
@@ -15,6 +18,9 @@ int main(int argc, char **argv) {
 
   builtins[2].func = &builtin_help;
   builtins[2].name = "help";
+
+  // Define handlers
+  signal(SIGCHLD, handle_sigchld);
 
   if (isatty(STDIN_FILENO)) {
     while (1) {
@@ -69,12 +75,21 @@ int run_command(Command cmd, built_in_func builtins[]) {
       return builtins[i].func(cmd);
     }
   }
-
-  pid_t pid = fork();
+  pid_t pid;
+  // If more processes in background than supported dont fork.
+  if (number_alive_background_processes >= MAX_BACKGROUND) {
+    pid = -2;
+  } else {
+    pid = fork();
+  }
   switch (pid) {
   case -1:
     // Failed to fork
     printf("Couldn't fork.\n");
+    return 1;
+  case -2:
+    // Too many background jobs
+    printf("Too many background jobs.\n");
     return 1;
   case 0: {
     // Child
@@ -100,6 +115,10 @@ int run_command(Command cmd, built_in_func builtins[]) {
     // parent
     if (!cmd.background) {
       wait(NULL);
+    } else {
+      printf("Process %lu Lives\n", (long)pid);
+      background_processes[number_alive_background_processes] = pid;
+      number_alive_background_processes++;
     }
     return 0;
   }
