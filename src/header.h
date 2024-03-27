@@ -49,5 +49,6 @@ int builtin_help(Command cmd);
 
 // Signal handlers
 void handle_sigchld();
+void handle_sigint();
 
 #endif

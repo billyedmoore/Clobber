@@ -1,11 +1,9 @@
 #include "header.h"
+#include <signal.h>
 
 void handle_sigchld() {
   /***
    * Catch SIGCHLD signal, when child stops executing.
-   * Write the fact it has exited to STDOUT.
-   *
-   * Input: Will have to get back to you on that one?.
    */
   // pid of the killed process.
   pid_t pid;
@@ -27,5 +25,20 @@ void handle_sigchld() {
       background_processes[number_alive_background_processes] = 0;
       break;
     }
+  }
+}
+
+void handle_sigint() {
+  /***
+   * Catch SIGINT signal.
+   *
+   * Pass CTRL-C to foreground process if it exists otherwise exit the program.
+   */
+  printf("%ld \n", (long)foreground_process);
+  // Pass a SIGTERM aka CTRL-C to the child process
+  if (foreground_process) {
+    kill(foreground_process, SIGINT);
+  } else {
+    exit(1);
   }
 }

@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 
   // Define handlers
   signal(SIGCHLD, handle_sigchld);
+  signal(SIGINT, handle_sigint);
 
   if (isatty(STDIN_FILENO)) {
     while (1) {
