@@ -17,7 +17,7 @@
 #define FONT_CYAN "\e[1;96m"
 #define FONT_GREEN "\e[0;92m"
 
-extern pid_t background_processes[10];
+extern pid_t background_processes[MAX_BACKGROUND];
 extern int number_alive_background_processes;
 
 // Structure to store a command.
