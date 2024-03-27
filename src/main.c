@@ -1,46 +1,10 @@
-#include <errno.h>
-#include <linux/limits.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#define FONT_COLOUR_RESET "\x1b[0m"
-#define FONT_CYAN "\e[1;96m"
-#define FONT_GREEN "\e[0;92m"
-
-// Structure to store a command.
-struct command {
-  char **arguments;
-  int count;
-  bool background;
-};
-
-typedef struct command Command;
-
-struct built_in_func_t {
-  int (*func)(Command cmd);
-  char *name;
-};
-
-typedef struct built_in_func_t built_in_func;
-int main_loop();
-int run_command(Command cmd);
-Command parse_command(char *line);
-
-// Builtins
-int builtin_cd(Command cmd);
-int builtin_exit(Command cmd);
-int builtin_help(Command cmd);
-
-built_in_func builtins[3];
+#include "header.h"
 
 int main(int argc, char **argv) {
   /***
    * The main function.
    */
+  built_in_func builtins[NUMBER_BUILTINS];
 
   // Define the builtins.
   builtins[0].func = &builtin_cd;
@@ -51,16 +15,17 @@ int main(int argc, char **argv) {
 
   builtins[2].func = &builtin_help;
   builtins[2].name = "help";
+
   if (isatty(STDIN_FILENO)) {
     while (1) {
-      main_loop();
+      main_loop(builtins);
     }
   } else {
     printf("We are in a script or are we?\n");
   }
 }
 
-int main_loop() {
+int main_loop(built_in_func builtins[]) {
   /***
    * Run one command.
    */
@@ -71,20 +36,21 @@ int main_loop() {
   printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
   fgets(line, 100, stdin);
   Command cmd = parse_command(line);
-  int exit_code = run_command(cmd);
+  int exit_code = run_command(cmd, builtins);
 
   free(line);
   free(cmd.arguments);
   return exit_code;
 }
 
-int run_command(Command cmd) {
+int run_command(Command cmd, built_in_func builtins[]) {
   /***
    * Run a command.
    *
    * Input:
    *  Command cmd: The command to be executed, made up of the arguments and
    *  number of arguments.
+   *  built_in_func[] builtins: The builtin functions that can be used.
    * Output:
    *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
    */
@@ -98,7 +64,7 @@ int run_command(Command cmd) {
   // Compare the first argument with each builtin function.
   // If they match execute the builtin.
   // Won't scale well if too many builtins.
-  for (int i = 0; i < (sizeof(builtins) / sizeof(built_in_func)); i++) {
+  for (int i = 0; i < NUMBER_BUILTINS; i++) {
     if (strcmp(builtins[i].name, cmd.arguments[0]) == 0) {
       return builtins[i].func(cmd);
     }
@@ -142,90 +108,4 @@ int run_command(Command cmd) {
   printf("Command \"%s\" not found.\n", cmd.arguments[0]);
 
   return 1;
-}
-
-Command parse_command(char *line) {
-  /***
-   * Parse a command into a "list" of arguments of type char**.
-   * Allocates memory up to a bufsize.
-   */
-  line[strcspn(line, "\n")] = 0;
-  int bufsize = 5; // The amount of pointers to allocate memory for.
-  int i = 0;       // The current words being handled.
-  char **args = malloc(sizeof(char *) *
-                       bufsize); // Allocate the memory at inital bufsize.
-
-  // Loop through each word using strtok
-  for (char *token = strtok(line, " "); token != NULL;
-       token = strtok(NULL, " ")) {
-    // If not enough memory has been allocated double the amount allocated.
-    if (i <= bufsize) {
-      bufsize = bufsize * 2;
-      args = realloc(args, sizeof(char *) * bufsize);
-    }
-    // Assign the word (token) to the next free pointer.
-    args[i] = token;
-    i++;
-  }
-
-  bool background = false;
-
-  // If there is one or more arguments and the last is "&" run in background.
-  if (i > 0 && strcmp(args[i - 1], "&") == 0) {
-    background = true;
-    i -= 1;
-    args[i] = NULL; // remove "&" from the arguements.
-  }
-  // Reallocate memory so only the amount needed is allocated.
-  args = realloc(args, (i) * sizeof(char *));
-  Command cmd = {args, i, background};
-
-  return cmd;
-}
-
-int builtin_cd(Command cmd) {
-  /***
-   * Builtin "cd" command to change the current working directory.
-   *
-   * Input:
-   *  Command cmd: The command made up of the argumentss (including "cd" as
-   * the first value) and the count. Output: int exit_code : See run_command
-   * for details.
-   */
-  if (cmd.count <= 1) {
-    printf("Not enough arguements silly.\n");
-    return 2;
-  } else {
-    int changed = chdir(cmd.arguments[1]);
-
-    switch (changed) {
-    case 0:
-      return 0;
-    case -1:
-      return 1;
-    default:
-      return 1;
-    }
-  }
-}
-
-int builtin_exit(Command cmd) { exit(0); }
-
-int builtin_help(Command cmd) {
-  /***
-   * Builtin "help" command.
-   * Input:
-   *  Command cmd: Not yet used, may be used to parse arguments in the future.
-   * Output:
-   *  int exit_code see execute command for details.
-   */
-  printf("Welcome to Clobber.\n");
-  printf("Like any shell you can run anything in your path.\n");
-  printf("There are three builtins \"cd\" \"help\" \"exit\".\n");
-  printf("Append & to any command to have it run in the background.\n");
-  printf("Hoping to add redirection and piping in the future.\n");
-  printf("This is an educational exercise so it is pretty simple and usability "
-         "is limited.\n");
-
-  return 0;
 }
