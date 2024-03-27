@@ -20,10 +20,6 @@ int main(int argc, char **argv) {
   builtins[2].func = &builtin_help;
   builtins[2].name = "help";
 
-  // Define handlers
-  signal(SIGCHLD, handle_sigchld);
-  signal(SIGINT, handle_sigint);
-
   if (isatty(STDIN_FILENO)) {
     while (1) {
       main_loop(builtins);

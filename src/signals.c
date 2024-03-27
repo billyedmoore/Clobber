@@ -1,6 +1,16 @@
 #include "header.h"
 #include <signal.h>
 
+void set_handlers() {
+  /***
+   * Define signal handlers.
+   */
+
+  // Define handlers
+  signal(SIGCHLD, handle_sigchld);
+  signal(SIGINT, handle_sigint);
+}
+
 void handle_sigchld() {
   /***
    * Catch SIGCHLD signal, when child stops executing.

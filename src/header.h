@@ -48,6 +48,8 @@ int builtin_exit(Command cmd);
 int builtin_help(Command cmd);
 
 // Signal handlers
+void set_handlers();
+
 void handle_sigchld();
 void handle_sigint();
 
