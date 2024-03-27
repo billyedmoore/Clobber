@@ -19,6 +19,7 @@
 
 extern pid_t background_processes[MAX_BACKGROUND];
 extern int number_alive_background_processes;
+extern pid_t foreground_process;
 
 // Structure to store a command.
 struct command {
@@ -47,6 +48,6 @@ int builtin_exit(Command cmd);
 int builtin_help(Command cmd);
 
 // Signal handlers
-void handle_sigchld(int signum);
+void handle_sigchld();
 
 #endif

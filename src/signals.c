@@ -1,6 +1,6 @@
 #include "header.h"
 
-void handle_sigchld(int signum) {
+void handle_sigchld() {
   /***
    * Catch SIGCHLD signal, when child stops executing.
    * Write the fact it has exited to STDOUT.

@@ -2,6 +2,7 @@
 
 pid_t background_processes[MAX_BACKGROUND];
 int number_alive_background_processes = 0;
+pid_t foreground_process;
 
 int main(int argc, char **argv) {
   /***
@@ -114,7 +115,10 @@ int run_command(Command cmd, built_in_func builtins[]) {
   default:
     // parent
     if (!cmd.background) {
+      // Keep track of foreground process so signals can be attributed.
+      foreground_process = pid;
       wait(NULL);
+      foreground_process = 0;
     } else {
       printf("Process %lu Lives\n", (long)pid);
       background_processes[number_alive_background_processes] = pid;
