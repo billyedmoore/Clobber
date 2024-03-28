@@ -44,6 +44,8 @@ int builtin_help(Command cmd) {
   printf("Like any shell you can run anything in your path.\n");
   printf("There are three builtins \"cd\" \"help\" \"exit\".\n");
   printf("Append & to any command to have it run in the background.\n");
+  printf("CTRL-C will kill the running process if there is one, if not it will "
+         "kill Clobber.\n");
   printf("Hoping to add redirection and piping in the future.\n");
   printf("This is an educational exercise so it is pretty simple and usability "
          "is limited.\n");
