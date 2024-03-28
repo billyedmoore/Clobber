@@ -21,11 +21,15 @@ extern pid_t background_processes[MAX_BACKGROUND];
 extern int number_alive_background_processes;
 extern pid_t foreground_process;
 
+enum redirection_types { NONE, NORMAL, APPEND };
+
 // Structure to store a command.
 struct command {
   char **arguments;
   int count;
   bool background;
+  char *redirection_file;
+  enum redirection_types redirection_type;
 };
 
 typedef struct command Command;

@@ -15,6 +15,10 @@ Command parse_command(char *line) {
   char **args = malloc(sizeof(char *) *
                        bufsize); // Allocate the memory at inital bufsize.
 
+  bool waiting_for_redirect_location = false;
+  char *redirect_location = "";
+  enum redirection_types redirect_type = NONE;
+
   // Loop through each word using strtok
   for (char *token = strtok(line, " "); token != NULL;
        token = strtok(NULL, " ")) {
@@ -23,9 +27,24 @@ Command parse_command(char *line) {
       bufsize = bufsize * 2;
       args = realloc(args, sizeof(char *) * bufsize);
     }
-    // Assign the word (token) to the next free pointer.
-    args[i] = token;
-    i++;
+    // Handle special characters ">" and ">>", each allowed to consume only one
+    // token a fd.
+    if (strcmp(token, ">") == 0) {
+      redirect_type = NORMAL;
+      waiting_for_redirect_location = true;
+    } else if (strcmp(token, ">>") == 0) {
+      redirect_type = APPEND;
+      waiting_for_redirect_location = true;
+    } else if (waiting_for_redirect_location) {
+      redirect_location = token;
+      waiting_for_redirect_location = false;
+
+    }
+    // Set the next free pointer to the token;
+    else {
+      args[i] = token;
+      i++;
+    }
   }
 
   bool background = false;
@@ -38,7 +57,7 @@ Command parse_command(char *line) {
   }
   // Reallocate memory so only the amount needed is allocated.
   args = realloc(args, (i) * sizeof(char *));
-  Command cmd = {args, i, background};
+  Command cmd = {args, i, background, redirect_location, NORMAL};
 
   return cmd;
 }
