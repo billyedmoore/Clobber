@@ -46,4 +46,14 @@ int main_loop(built_in_func builtins[]) {
   return exit_code;
 }
 
-void delete_command(Command cmd) { free(cmd.arguments); }
+void delete_command(Command cmd) {
+  /***
+   * Deallocate all dynamically allocated memory related to cmd.
+   */
+  // Free all arguments.
+  for (int i = 0; i < cmd.count; i++) {
+    free(cmd.arguments[i]);
+  }
+  // Free the arguments structure.
+  free(cmd.arguments);
+}

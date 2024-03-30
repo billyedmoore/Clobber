@@ -57,12 +57,11 @@ Command parse_command(char *line) {
   }
   args[i] = NULL;
 
-  char **args_cpy = copy_string_array(args, i);
+  Command cmd = {copy_string_array(args, i), i, background, redirect_location,
+                 NORMAL};
 
-  Command cmd = {args_cpy, i, background, redirect_location, NORMAL};
-
-  free(args);
   free(line);
+  free(args);
 
   return cmd;
 }
