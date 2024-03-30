@@ -44,7 +44,10 @@ typedef struct built_in_func_t built_in_func;
 
 int main_loop(built_in_func builtins[]);
 int run_command(Command cmd, built_in_func builtins[]);
+
 Command parse_command(char *line);
+void delete_command(Command cmd);
+char **copy_string_array(char **source, int num_elements);
 
 // Builtins
 int builtin_cd(Command cmd);

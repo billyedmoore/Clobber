@@ -23,7 +23,7 @@ Command parse_command(char *line) {
   for (char *token = strtok(line, " "); token != NULL;
        token = strtok(NULL, " ")) {
     // If not enough memory has been allocated double the amount allocated.
-    if (i <= bufsize) {
+    if (i + 1 <= bufsize) {
       bufsize = bufsize * 2;
       args = realloc(args, sizeof(char *) * bufsize);
     }
@@ -55,11 +55,23 @@ Command parse_command(char *line) {
     i -= 1;
     args[i] = NULL; // remove "&" from the arguements.
   }
-  // Reallocate memory so only the amount needed is allocated.
-  args = realloc(args, (i + 1) * sizeof(char *));
   args[i] = NULL;
 
-  Command cmd = {args, i, background, redirect_location, NORMAL};
+  char **args_cpy = copy_string_array(args, i);
+
+  Command cmd = {args_cpy, i, background, redirect_location, NORMAL};
+
+  free(args);
+  free(line);
 
   return cmd;
+}
+
+char **copy_string_array(char **source, int num_elements) {
+  char **dest = malloc((num_elements + 1) * sizeof(char *));
+  for (int i = 0; i < num_elements; i++) {
+    dest[i] = strdup(source[i]);
+  }
+  dest[num_elements] = NULL;
+  return dest;
 }

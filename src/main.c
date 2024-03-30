@@ -42,7 +42,8 @@ int main_loop(built_in_func builtins[]) {
   Command cmd = parse_command(line);
   int exit_code = run_command(cmd, builtins);
 
-  free(line);
-  free(cmd.arguments);
+  delete_command(cmd);
   return exit_code;
 }
+
+void delete_command(Command cmd) { free(cmd.arguments); }
