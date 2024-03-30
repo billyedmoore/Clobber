@@ -67,9 +67,15 @@ Command parse_command(char *line) {
 }
 
 char **copy_string_array(char **source, int num_elements) {
+  /***
+   * Return a char** series of strings that is a copy of a char** series of
+   * strings.
+   */
   char **dest = malloc((num_elements + 1) * sizeof(char *));
   for (int i = 0; i < num_elements; i++) {
-    dest[i] = strdup(source[i]);
+    size_t len = 1 + strlen(source[i]);
+    dest[i] = malloc(len);
+    strcpy(dest[i], source[i]);
   }
   dest[num_elements] = NULL;
   return dest;
