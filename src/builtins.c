@@ -14,7 +14,7 @@ int builtin_cd(Command cmd) {
    * for details.
    */
   if (cmd.count <= 1) {
-    printf("Not enough arguements silly.\n");
+    printf("Not enough arguments silly.\n");
     return 2;
   } else {
     int changed = chdir(cmd.arguments[1]);
