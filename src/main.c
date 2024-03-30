@@ -1,9 +1,17 @@
 #include "header.h"
 
+pid_t background_processes[MAX_BACKGROUND];
+int number_alive_background_processes = 0;
+pid_t foreground_process;
+command_list command_queue;
+
 int main(int argc, char **argv) {
   /***
    * The main function.
    */
+
+  command_queue = create_command_queue();
+
   built_in_func builtins[NUMBER_BUILTINS];
 
   // Define the builtins.
@@ -29,83 +37,22 @@ int main_loop(built_in_func builtins[]) {
   /***
    * Run one command.
    */
-  char *line = malloc(100 * sizeof(char));
-  char cwd[PATH_MAX];
-  getcwd(cwd, sizeof(cwd));
 
-  printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
-  fgets(line, 100, stdin);
-  Command cmd = parse_command(line);
+  Command cmd;
+  if (command_queue.len > 0) {
+    cmd = get_next_command_from_queue();
+  } else {
+    char *line = malloc(100 * sizeof(char));
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+
+    printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
+    fgets(line, 100, stdin);
+    // parse_command disposes of the line once done with it.
+    cmd = parse_command(line);
+  }
   int exit_code = run_command(cmd, builtins);
 
-  free(line);
-  free(cmd.arguments);
+  delete_command(cmd);
   return exit_code;
-}
-
-int run_command(Command cmd, built_in_func builtins[]) {
-  /***
-   * Run a command.
-   *
-   * Input:
-   *  Command cmd: The command to be executed, made up of the arguments and
-   *  number of arguments.
-   *  built_in_func[] builtins: The builtin functions that can be used.
-   * Output:
-   *  int exit status: 0 -> Success, 1 -> Failure, 2 -> Usage Error.
-   */
-
-  // If the command is empty.
-  if (cmd.count == 0) {
-    printf("Enter a command.\n");
-    return 2;
-  }
-
-  // Compare the first argument with each builtin function.
-  // If they match execute the builtin.
-  // Won't scale well if too many builtins.
-  for (int i = 0; i < NUMBER_BUILTINS; i++) {
-    if (strcmp(builtins[i].name, cmd.arguments[0]) == 0) {
-      return builtins[i].func(cmd);
-    }
-  }
-
-  pid_t pid = fork();
-  switch (pid) {
-  case -1:
-    // Failed to fork
-    printf("Couldn't fork.\n");
-    return 1;
-  case 0: {
-    // Child
-    int exit_code = execvp(cmd.arguments[0], cmd.arguments);
-    if (exit_code == -1) {
-      switch (errno) {
-      case (2):
-        fprintf(stderr, "Program \"%s\" not found\n", cmd.arguments[0]);
-        break;
-      case (13):
-        fprintf(stderr, "Permission denied\n");
-        break;
-      default:
-        fprintf(stderr, "Couldn't execute %s due to %s\n", cmd.arguments[0],
-                strerror(errno));
-        break;
-      }
-    }
-    exit(1);
-    break;
-  }
-  default:
-    // parent
-    if (!cmd.background) {
-      wait(NULL);
-    }
-    return 0;
-  }
-
-  // If we haven't run a command then command not found.
-  printf("Command \"%s\" not found.\n", cmd.arguments[0]);
-
-  return 1;
 }
