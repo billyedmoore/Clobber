@@ -14,7 +14,7 @@ int builtin_cd(Command cmd) {
    * for details.
    */
   if (cmd.count <= 1) {
-    printf("Not enough arguements silly.\n");
+    printf("Not enough arguments silly.\n");
     return 2;
   } else {
     int changed = chdir(cmd.arguments[1]);
@@ -30,7 +30,14 @@ int builtin_cd(Command cmd) {
   }
 }
 
-int builtin_exit(Command cmd) { exit(0); }
+int builtin_exit(Command cmd) {
+  /***
+   * Builtin "exit" command.
+   */
+  delete_command(cmd);
+  delete_command_list(command_queue);
+  exit(0);
+}
 
 int builtin_help(Command cmd) {
   /***
