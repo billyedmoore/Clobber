@@ -30,7 +30,13 @@ int builtin_cd(Command cmd) {
   }
 }
 
-int builtin_exit(Command cmd) { exit(0); }
+int builtin_exit(Command cmd) {
+  /***
+   * Builtin "exit" command.
+   */
+  delete_command(cmd);
+  exit(0);
+}
 
 int builtin_help(Command cmd) {
   /***
