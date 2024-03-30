@@ -79,6 +79,14 @@ command_list create_command_queue() {
   return queue;
 }
 
+void delete_command_list(command_list cmd_lst) {
+  /***
+   * Deallocate memory allocated for a command_list.
+   */
+
+  free(cmd_lst.commands);
+}
+
 Command get_next_command_from_queue() {
   // Get the next command from the queue.
 

@@ -53,7 +53,10 @@ typedef struct command_list_t command_list;
 int main_loop(built_in_func builtins[]);
 int run_command(Command cmd, built_in_func builtins[]);
 command_list create_command_queue();
+void delete_command_list(command_list cmd_lst);
 Command get_next_command_from_queue();
+
+extern command_list command_queue;
 
 Command parse_command(char *line);
 void delete_command(Command cmd);
