@@ -56,7 +56,9 @@ Command parse_command(char *line) {
     args[i] = NULL; // remove "&" from the arguements.
   }
   // Reallocate memory so only the amount needed is allocated.
-  args = realloc(args, (i) * sizeof(char *));
+  args = realloc(args, (i + 1) * sizeof(char *));
+  args[i] = NULL;
+
   Command cmd = {args, i, background, redirect_location, NORMAL};
 
   return cmd;
