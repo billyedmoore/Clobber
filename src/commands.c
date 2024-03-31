@@ -17,8 +17,9 @@ command_list create_command_queue() {
    * Create a command queue.
    */
 
-  command_list queue = {
-      .len = 0, .commands = malloc(sizeof(Command) * MAX_COMMAND_QUEUE_SIZE)};
+  command_list queue = {.len = 0,
+                        .commands = malloc(sizeof(Command) * BUFFER_SIZE),
+                        .allocated_len = BUFFER_SIZE};
   return queue;
 }
 

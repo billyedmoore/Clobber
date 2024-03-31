@@ -35,7 +35,7 @@ int builtin_exit(Command cmd) {
    * Builtin "exit" command.
    */
   delete_command(cmd);
-  delete_command_list(command_queue);
+  free_before_exit();
   exit(0);
 }
 

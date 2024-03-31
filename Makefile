@@ -9,7 +9,6 @@ run: build
 debug: 
 		@echo "Debugging with gbd"
 		gcc src/main.c src/builtins.c src/parsing.c src/signals.c src/execute.c src/commands.c -o clobber.out -g
-		gdb ./clobber.out
 memtest: build
 		@echo "Running with valgrind"
 		valgrind ./clobber.out
