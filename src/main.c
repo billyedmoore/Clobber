@@ -12,6 +12,7 @@ int main(int argc, char **argv) {
    * The main function.
    */
 
+  set_handlers();
   command_queue = create_command_queue();
   builtins = create_builtins();
 
