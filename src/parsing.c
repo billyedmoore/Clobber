@@ -4,6 +4,47 @@
  * Parsing inputs into Commands
  */
 
+char *prompt() {
+  /***
+   * Display the prompt to the user and get the command.
+   */
+  char *line = malloc(MAX_LINE_SIZE * sizeof(char));
+  char cwd[PATH_MAX];
+  getcwd(cwd, sizeof(cwd));
+
+  printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
+  fgets(line, MAX_LINE_SIZE, stdin);
+
+  return line;
+}
+
+void populate_command_queue() {
+  /***
+   * Read lines from stdin attempting to parse each line and add it to the
+   * queue.
+   *
+   * Output: Modifies the command_queue by adding the commands.
+   *         Modifies the "stdin" by reading till it is empty.
+   */
+  char *line = malloc(100 * sizeof(char));
+  while (fgets(line, 100, stdin) != NULL) {
+    Command cmd = parse_command(line);
+
+    // If there is not enough space to store another command allocate more
+    // memory for it.
+    if (command_queue.len >= command_queue.allocated_len) {
+      command_queue.allocated_len = command_queue.allocated_len * 2;
+      command_queue.commands =
+          realloc(command_queue.commands,
+                  sizeof(Command) * command_queue.allocated_len);
+    }
+    // Add command to the queue.
+    command_queue.commands[command_queue.len] = cmd;
+    command_queue.len += 1;
+  }
+  free(line);
+}
+
 Command parse_command(char *line) {
   /***
    * Parse a command into a "list" of arguments of type char**.

@@ -4,6 +4,22 @@
  * Functions for builtin commands.
  */
 
+built_in_func *create_builtins() {
+  built_in_func *builtins_l = malloc(NUMBER_BUILTINS * sizeof(built_in_func));
+
+  // Define the builtins.
+  builtins_l[0].func = &builtin_cd;
+  builtins_l[0].name = "cd";
+
+  builtins_l[1].func = &builtin_exit;
+  builtins_l[1].name = "exit";
+
+  builtins_l[2].func = &builtin_help;
+  builtins_l[2].name = "help";
+
+  return builtins_l;
+}
+
 int builtin_cd(Command cmd) {
   /***
    * Builtin "cd" command to change the current working directory.
