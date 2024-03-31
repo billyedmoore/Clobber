@@ -52,7 +52,11 @@ Mkfile.old
 dkms.conf
 
 # Notes and tempfiles
-temp 
 temp.txt
+temp.md 
+notes.txt
 notes.md 
-notes 
+
+# clobber files
+*.clobber
+*.clob

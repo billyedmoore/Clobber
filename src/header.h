@@ -12,7 +12,7 @@
 
 #define NUMBER_BUILTINS 3
 #define MAX_BACKGROUND 30
-#define MAX_COMMAND_QUEUE_SIZE 10
+#define BUFFER_SIZE 10
 
 #define FONT_COLOUR_RESET "\x1b[0m"
 #define FONT_CYAN "\e[1;96m"
@@ -23,6 +23,8 @@ extern int number_alive_background_processes;
 extern pid_t foreground_process;
 
 enum redirection_types { NONE, NORMAL, APPEND };
+
+enum operating_mode { INTERACTIVE, SCRIPT };
 
 // Structure to store a command.
 struct command {
@@ -44,14 +46,16 @@ struct built_in_func_t {
 typedef struct built_in_func_t built_in_func;
 
 struct command_list_t {
-  int len;
+  size_t len;
   Command *commands;
+  size_t allocated_len;
 };
 
 typedef struct command_list_t command_list;
 
 int main_loop(built_in_func builtins[]);
 int run_command(Command cmd, built_in_func builtins[]);
+void free_before_exit();
 command_list create_command_queue();
 void delete_command_list(command_list cmd_lst);
 Command get_next_command_from_queue();

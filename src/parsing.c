@@ -60,7 +60,6 @@ Command parse_command(char *line) {
   Command cmd = {copy_string_array(args, i), i, background, redirect_location,
                  NORMAL};
 
-  free(line);
   free(args);
 
   return cmd;
