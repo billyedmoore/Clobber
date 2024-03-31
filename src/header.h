@@ -12,6 +12,7 @@
 
 #define NUMBER_BUILTINS 3
 #define MAX_BACKGROUND 30
+#define MAX_LINE_SIZE 200
 #define BUFFER_SIZE 10
 
 #define FONT_COLOUR_RESET "\x1b[0m"
@@ -62,7 +63,9 @@ Command get_next_command_from_queue();
 
 extern command_list command_queue;
 
+char *prompt();
 Command parse_command(char *line);
+void populate_command_queue();
 void delete_command(Command cmd);
 char **copy_string_array(char **source, int num_elements);
 

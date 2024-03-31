@@ -28,21 +28,7 @@ int main(int argc, char **argv) {
   if (!isatty(STDIN_FILENO)) {
     // IF RUNNING IN A SCRIPT
     operating_mode = SCRIPT;
-    char *line = malloc(100 * sizeof(char));
-    while (fgets(line, 100, stdin) != NULL) {
-      Command cmd = parse_command(line);
-
-      if (command_queue.len >= command_queue.allocated_len) {
-        command_queue.allocated_len = command_queue.allocated_len * 2;
-        // Allocate more memory to store more commands
-        command_queue.commands =
-            realloc(command_queue.commands,
-                    sizeof(Command) * command_queue.allocated_len);
-      }
-      command_queue.commands[command_queue.len] = cmd;
-      command_queue.len += 1;
-    }
-    free(line);
+    populate_command_queue();
   } else {
     // OTHERWISE RUNNING INTERACTIVELY
     operating_mode = INTERACTIVE;
@@ -61,15 +47,11 @@ int main_loop(built_in_func builtins[]) {
   if (command_queue.len > 0) {
     cmd = get_next_command_from_queue();
   } else if (operating_mode == INTERACTIVE) {
-    char *line = malloc(100 * sizeof(char));
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
-
-    printf(FONT_CYAN "(%s)" FONT_GREEN " -> " FONT_COLOUR_RESET, cwd);
-    fgets(line, 100, stdin);
+    char *line = prompt();
     cmd = parse_command(line);
     free(line);
   } else {
+    // If not in INTERACTIVE mode and there are no more commands in the queue.
     free_before_exit();
     exit(1);
   }
@@ -82,8 +64,6 @@ int main_loop(built_in_func builtins[]) {
 void free_before_exit() {
   /***
    * Deallocate memory before exiting.
-   *
-   *
    */
   delete_command_list(command_queue);
 }
