@@ -1,6 +1,6 @@
 #include "header.h"
 
-int run_command(Command cmd, built_in_func builtins[]) {
+int run_command(Command cmd) {
   /***
    * Run a command.
    *

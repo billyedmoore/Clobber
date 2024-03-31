@@ -46,6 +46,9 @@ struct built_in_func_t {
 
 typedef struct built_in_func_t built_in_func;
 
+extern built_in_func *builtins;
+built_in_func *create_builtins();
+
 struct command_list_t {
   size_t len;
   Command *commands;
@@ -54,8 +57,8 @@ struct command_list_t {
 
 typedef struct command_list_t command_list;
 
-int main_loop(built_in_func builtins[]);
-int run_command(Command cmd, built_in_func builtins[]);
+int main_loop();
+int run_command(Command cmd);
 void free_before_exit();
 command_list create_command_queue();
 void delete_command_list(command_list cmd_lst);
