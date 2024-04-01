@@ -57,7 +57,8 @@ struct command_list_t {
   size_t allocated_len;
 };
 extern command_list command_queue;
-command_list create_command_queue();
+command_list create_command_list();
+command_list append_command_list(command_list cmd_lst, Command cmd);
 void delete_command_list(command_list cmd_lst);
 void populate_command_queue();
 Command get_next_command_from_queue();
@@ -69,7 +70,7 @@ int main_loop();
 char *prompt();
 void free_before_exit();
 
-Command parse_command(char *line);
+command_list parse_line(char *line);
 void delete_command(Command cmd);
 char **copy_string_array(char **source, int num_elements);
 

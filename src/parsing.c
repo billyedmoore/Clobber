@@ -28,24 +28,16 @@ void populate_command_queue() {
    */
   char *line = malloc(100 * sizeof(char));
   while (fgets(line, 100, stdin) != NULL) {
-    Command cmd = parse_command(line);
-
-    // If there is not enough space to store another command allocate more
-    // memory for it.
-    if (command_queue.len >= command_queue.allocated_len) {
-      command_queue.allocated_len = command_queue.allocated_len * 2;
-      command_queue.commands =
-          realloc(command_queue.commands,
-                  sizeof(Command) * command_queue.allocated_len);
+    command_list cmds = parse_line(line);
+    for (int i = 0; i < cmds.len; i++) {
+      command_queue = append_command_list(command_queue, cmds.commands[i]);
     }
-    // Add command to the queue.
-    command_queue.commands[command_queue.len] = cmd;
-    command_queue.len += 1;
+    delete_command_list(cmds);
   }
   free(line);
 }
 
-Command parse_command(char *line) {
+command_list parse_line(char *line) {
   /***
    * Parse a command into a "list" of arguments of type char**.
    * Allocates memory up to a bufsize.
@@ -101,9 +93,12 @@ Command parse_command(char *line) {
   Command cmd = {copy_string_array(args, i), i, background, redirect_location,
                  NORMAL};
 
+  command_list cmds = create_command_list();
+  cmds = append_command_list(cmds, cmd);
+
   free(args);
 
-  return cmd;
+  return cmds;
 }
 
 char **copy_string_array(char **source, int num_elements) {

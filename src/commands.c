@@ -12,7 +12,7 @@ void delete_command(Command cmd) {
   free(cmd.arguments);
 }
 
-command_list create_command_queue() {
+command_list create_command_list() {
   /***
    * Create a command queue.
    */
@@ -21,6 +21,24 @@ command_list create_command_queue() {
                         .commands = malloc(sizeof(Command) * BUFFER_SIZE),
                         .allocated_len = BUFFER_SIZE};
   return queue;
+}
+
+command_list append_command_list(command_list cmd_lst, Command cmd) {
+  /***
+   * Append command to command list.
+   */
+  // If there is not enough space to store another command allocate more
+  // memory for it.
+  if (cmd_lst.len >= cmd_lst.allocated_len) {
+    cmd_lst.allocated_len = cmd_lst.allocated_len * 2;
+    cmd_lst.commands =
+        realloc(cmd_lst.commands, sizeof(Command) * cmd_lst.allocated_len);
+  }
+  // Add command to the queue.
+  cmd_lst.commands[cmd_lst.len] = cmd;
+  cmd_lst.len += 1;
+
+  return cmd_lst;
 }
 
 void delete_command_list(command_list cmd_lst) {
