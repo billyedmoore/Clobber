@@ -1,5 +1,16 @@
 #include "header.h"
 
+Command create_command(char **args, int arg_count, bool background,
+                       char *redirect_location,
+                       enum redirection_types redirect_type, bool piped) {
+  /***
+   * Create a new command with the arugments as given.
+   */
+  Command cmd = {args,          arg_count, background, redirect_location,
+                 redirect_type, piped};
+  return cmd;
+}
+
 void delete_command(Command cmd) {
   /***
    * Deallocate all dynamically allocated memory related to cmd.

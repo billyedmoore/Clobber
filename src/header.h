@@ -31,6 +31,7 @@ struct command {
   bool background;
   char *redirection_file;
   enum redirection_types redirection_type;
+  bool piped;
 };
 typedef struct command Command;
 int run_command(Command cmd);
@@ -73,6 +74,9 @@ void free_before_exit();
 command_list parse_line(char *line);
 Command parse_one_command(char *line);
 void delete_command(Command cmd);
+Command create_command(char **args, int arg_count, bool background,
+                       char *redirect_location,
+                       enum redirection_types redirect_type, bool piped);
 char **copy_string_array(char **source, int num_elements);
 
 // Builtins

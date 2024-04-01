@@ -100,8 +100,8 @@ Command parse_one_command(char *line) {
   }
   args[i] = NULL;
 
-  Command cmd = {copy_string_array(args, i), i, background, redirect_location,
-                 NORMAL};
+  Command cmd = create_command(copy_string_array(args, i), i, background,
+                               redirect_location, NORMAL, false);
   free(args);
   return cmd;
 }
