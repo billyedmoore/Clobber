@@ -26,6 +26,8 @@ command_list create_command_list() {
 command_list append_command_list(command_list cmd_lst, Command cmd) {
   /***
    * Append command to command list.
+   * Output:
+   *  command_list, the command_list with cmd appended.
    */
   // If there is not enough space to store another command allocate more
   // memory for it.

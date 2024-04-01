@@ -42,9 +42,20 @@ command_list parse_line(char *line) {
    * Parse a command into a "list" of arguments of type char**.
    * Allocates memory up to a bufsize.
    */
+
+  // delete new line.
   line[strcspn(line, "\n")] = 0;
-  int bufsize = 5; // The amount of pointers to allocate memory for.
-  int i = 0;       // The current words being handled.
+  Command cmd = parse_one_command(line);
+  command_list cmds = create_command_list();
+  cmds = append_command_list(cmds, cmd);
+
+  return cmds;
+}
+
+Command parse_one_command(char *line) {
+  // Parse one command from a string into a Command object.
+  int bufsize = BUFFER_SIZE; // The amount of pointers to allocate memory for.
+  int i = 0;                 // The index of the words being handled.
   char **args = malloc(sizeof(char *) *
                        bufsize); // Allocate the memory at inital bufsize.
 
@@ -79,10 +90,9 @@ command_list parse_line(char *line) {
       i++;
     }
   }
-
   bool background = false;
-
   // If there is one or more arguments and the last is "&" run in background.
+
   if (i > 0 && strcmp(args[i - 1], "&") == 0) {
     background = true;
     i -= 1;
@@ -92,13 +102,8 @@ command_list parse_line(char *line) {
 
   Command cmd = {copy_string_array(args, i), i, background, redirect_location,
                  NORMAL};
-
-  command_list cmds = create_command_list();
-  cmds = append_command_list(cmds, cmd);
-
   free(args);
-
-  return cmds;
+  return cmd;
 }
 
 char **copy_string_array(char **source, int num_elements) {

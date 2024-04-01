@@ -71,6 +71,7 @@ char *prompt();
 void free_before_exit();
 
 command_list parse_line(char *line);
+Command parse_one_command(char *line);
 void delete_command(Command cmd);
 char **copy_string_array(char **source, int num_elements);
 
