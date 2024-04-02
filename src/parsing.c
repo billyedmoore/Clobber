@@ -102,7 +102,7 @@ split_line split_on_symbol(char *line, char sym) {
 
   split_line sl = create_split_line();
 
-  for (int i; i <= string_len; i++) {
+  for (int i = 0; i <= string_len; i++) {
     if (line[i] == sym || i == string_len) {
       line[i] = '\0';
       int token_len = i - prev_token_pos;

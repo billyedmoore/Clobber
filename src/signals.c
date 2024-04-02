@@ -21,7 +21,7 @@ void handle_sigchld() {
   int child_status;
   pid = waitpid(-1, &child_status, WNOHANG);
 
-  for (int i; i < number_alive_background_processes; i++) {
+  for (int i = 0; i < number_alive_background_processes; i++) {
     // If process is a background_process then print the kill message and remove
     // it from the list of background processes.
     if (background_processes[i] == pid) {

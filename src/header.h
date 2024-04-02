@@ -13,6 +13,7 @@
 #define NUMBER_BUILTINS 3
 #define MAX_BACKGROUND 30
 #define MAX_LINE_SIZE 200
+// Used anytime memory is dynamically allocated.
 #define BUFFER_SIZE 10
 
 #define FONT_COLOUR_RESET "\x1b[0m"
