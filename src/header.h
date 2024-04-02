@@ -71,6 +71,18 @@ int main_loop();
 char *prompt();
 void free_before_exit();
 
+struct split_line_t {
+  char **splits;
+  size_t count;
+  size_t allocated_size;
+};
+typedef struct split_line_t split_line;
+
+split_line split_on_symbol(char *line, char sym);
+split_line create_split_line();
+split_line append_split(split_line sl, char *token);
+void delete_split_line(split_line sl);
+
 command_list parse_line(char *line);
 Command parse_one_command(char *line);
 void delete_command(Command cmd);
