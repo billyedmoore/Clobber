@@ -1,5 +1,8 @@
 #include "header.h"
 
+/***
+ * COMMMAND
+ */
 Command create_command(char **args, int arg_count, bool background,
                        char *redirect_location,
                        enum redirection_types redirect_type, bool piped) {
@@ -23,6 +26,9 @@ void delete_command(Command cmd) {
   free(cmd.arguments);
 }
 
+/***
+ * COMMAND LIST
+ */
 command_list create_command_list() {
   /***
    * Create a command queue.
@@ -83,4 +89,35 @@ Command get_next_command_from_queue() {
   command_queue.len--;
 
   return cmd;
+}
+
+/***
+ * COMMAND BATCH
+ */
+
+command_batch create_command_batch(command_list cmd_lst) {
+  /***
+   * Create command_batch from command_list.
+   */
+  int num_pipes = cmd_lst.len - 1;
+  int **pipes = calloc(num_pipes, sizeof(int *));
+  for (int i = 0; i < num_pipes; i++) {
+    pipes[i] = calloc(2, sizeof(int));
+    for (int j = 0; i < 2; i++) {
+      pipes[i][j] = 0;
+    }
+  }
+  command_batch batch = {.cmd_lst = cmd_lst, .pipes = pipes};
+  return batch;
+}
+
+void delete_command_batch(command_batch batch) {
+  /***
+   * Deallocate memory from command_batch.
+   */
+  int num_pipes = batch.cmd_lst.len - 1;
+  for (int i = 0; i < num_pipes; i++) {
+    free(batch.pipes[i]);
+  }
+  free(batch.pipes);
 }

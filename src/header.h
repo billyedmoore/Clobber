@@ -65,6 +65,15 @@ void delete_command_list(command_list cmd_lst);
 void populate_command_queue();
 Command get_next_command_from_queue();
 
+// Structure to store a series of commands that are to be piped to each other.
+struct command_batch_t {
+  command_list cmd_lst;
+  int **pipes;
+};
+typedef struct command_batch_t command_batch;
+command_batch create_command_batch(command_list cmd_lst);
+void delete_command_batch(command_batch batch);
+
 extern built_in_func *builtins;
 built_in_func *create_builtins();
 
