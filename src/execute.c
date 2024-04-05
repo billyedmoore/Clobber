@@ -2,7 +2,9 @@
 
 int run_command_batch(command_batch batch) {
   for (int i = 0; i < batch.cmd_lst.len; i++) {
-    run_command(batch.cmd_lst.commands[i]);
+    if (!pending_exit) {
+      run_command(batch.cmd_lst.commands[i]);
+    }
   }
   return 1;
 }

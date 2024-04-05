@@ -1,5 +1,6 @@
 #include "header.h"
 
+bool pending_exit = false;
 pid_t background_processes[MAX_BACKGROUND];
 int number_alive_background_processes = 0;
 pid_t foreground_process;
@@ -39,7 +40,7 @@ int main_loop() {
   //  parse it to get a queue of commands
   //  append commands to the command_queue
   //
-  if (queue.len == 0 && operating_mode == INTERACTIVE) {
+  if (queue.len == 0 && operating_mode == INTERACTIVE && !pending_exit) {
     char *line = prompt();
     command_list cmds = parse_line(line);
     command_batch batch = create_command_batch(cmds);
@@ -48,7 +49,7 @@ int main_loop() {
   }
 
   // If theres a command in the queue run it.
-  if (queue.len > 0) {
+  if (queue.len > 0 && !pending_exit) {
     command_batch batch = get_next_batch_from_queue();
     int exit_code = run_command_batch(batch);
     delete_command_batch(batch);
@@ -56,7 +57,7 @@ int main_loop() {
   } else {
     // If not in INTERACTIVE mode and there are no more commands in the queue.
     free_before_exit();
-    exit(1);
+    exit(0);
   }
 }
 
