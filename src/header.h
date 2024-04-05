@@ -74,6 +74,15 @@ typedef struct command_batch_t command_batch;
 command_batch create_command_batch(command_list cmd_lst);
 void delete_command_batch(command_batch batch);
 
+struct execution_queue_t {
+  command_batch *batches;
+  // The number of batches
+  size_t len;
+  // The amount of memory allocated
+  size_t allocated_len;
+};
+typedef struct execution_queue_t execution_queue;
+
 extern built_in_func *builtins;
 built_in_func *create_builtins();
 
