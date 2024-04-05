@@ -58,7 +58,6 @@ struct command_list_t {
   Command *commands;
   size_t allocated_len;
 };
-extern command_list command_queue;
 command_list create_command_list();
 command_list append_command_list(command_list cmd_lst, Command cmd);
 void delete_command_list(command_list cmd_lst);
@@ -72,6 +71,7 @@ struct command_batch_t {
 };
 typedef struct command_batch_t command_batch;
 command_batch create_command_batch(command_list cmd_lst);
+int run_command_batch(command_batch batch);
 void delete_command_batch(command_batch batch);
 
 struct execution_queue_t {
@@ -82,6 +82,12 @@ struct execution_queue_t {
   size_t allocated_len;
 };
 typedef struct execution_queue_t execution_queue;
+extern execution_queue queue;
+execution_queue create_execution_queue();
+execution_queue append_to_execution_queue(execution_queue exe_q,
+                                          command_batch batch);
+void delete_execution_queue(execution_queue exe_q);
+command_batch get_next_batch_from_queue();
 
 extern built_in_func *builtins;
 built_in_func *create_builtins();
@@ -112,6 +118,7 @@ char **copy_string_array(char **source, int num_elements);
 
 // Builtins
 int builtin_cd(Command cmd);
+extern bool pending_exit;
 int builtin_exit(Command cmd);
 int builtin_help(Command cmd);
 

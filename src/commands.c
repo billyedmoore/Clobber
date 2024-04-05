@@ -64,31 +64,10 @@ void delete_command_list(command_list cmd_lst) {
   /***
    * Deallocate memory allocated for a command_list.
    */
-
-  free(cmd_lst.commands);
-}
-
-Command get_next_command_from_queue() {
-  /***
-   * Get the next command from the command_queue remove it from the queue and
-   * return it.
-   */
-
-  if (command_queue.len == 0) {
-    // Not sure of the best way to handle this.
-    printf("No command in queue.\n");
-    exit(1);
+  for (int i = 0; i < cmd_lst.len; i++) {
+    delete_command(cmd_lst.commands[i]);
   }
-
-  Command cmd = command_queue.commands[0];
-
-  // Move the commands forward.
-  for (int i = 0; i < (command_queue.len - 1); i++) {
-    command_queue.commands[i] = command_queue.commands[i + 1];
-  };
-  command_queue.len--;
-
-  return cmd;
+  free(cmd_lst.commands);
 }
 
 /***
@@ -103,7 +82,7 @@ command_batch create_command_batch(command_list cmd_lst) {
   int **pipes = calloc(num_pipes, sizeof(int *));
   for (int i = 0; i < num_pipes; i++) {
     pipes[i] = calloc(2, sizeof(int));
-    for (int j = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
       pipes[i][j] = 0;
     }
   }
@@ -120,4 +99,63 @@ void delete_command_batch(command_batch batch) {
     free(batch.pipes[i]);
   }
   free(batch.pipes);
+  delete_command_list(batch.cmd_lst);
+}
+
+execution_queue create_execution_queue() {
+  /***
+   * Create an execution_queue.
+   */
+  command_batch *batches = calloc(BUFFER_SIZE, sizeof(command_batch));
+  execution_queue queue = {
+      .len = 0, .batches = batches, .allocated_len = BUFFER_SIZE};
+  return queue;
+}
+
+execution_queue append_to_execution_queue(execution_queue exe_q,
+                                          command_batch batch) {
+  /***
+   * Append command_batch to the execution_queue.
+   */
+  if (exe_q.len <= exe_q.allocated_len) {
+    exe_q.allocated_len *= 2;
+    exe_q.batches =
+        realloc(exe_q.batches, exe_q.allocated_len * sizeof(command_batch));
+  }
+  exe_q.batches[exe_q.len] = batch;
+  exe_q.len++;
+  return exe_q;
+}
+
+void delete_execution_queue(execution_queue exe_q) {
+  /***
+   * Deallocate memory from execution_queue.
+   */
+  for (int i = 0; i < exe_q.len; i++) {
+    delete_command_batch(exe_q.batches[i]);
+  }
+  free(exe_q.batches);
+}
+
+command_batch get_next_batch_from_queue() {
+  /***
+   * get the next batch from the execution_queue remove it from the queue and
+   * return it.
+   */
+
+  if (queue.len == 0) {
+    // not sure of the best way to handle this.
+    printf("no command in queue.\n");
+    exit(1);
+  }
+
+  command_batch batch = queue.batches[0];
+
+  // move the commands forward.
+  for (int i = 0; i < (queue.len - 1); i++) {
+    queue.batches[i] = queue.batches[i + 1];
+  };
+  queue.len--;
+
+  return batch;
 }

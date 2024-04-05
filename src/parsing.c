@@ -31,9 +31,8 @@ void populate_command_queue() {
   char *line = malloc(MAX_LINE_SIZE * sizeof(char));
   while (fgets(line, MAX_LINE_SIZE, stdin) != NULL) {
     command_list cmds = parse_line(line);
-    for (int i = 0; i < cmds.len; i++) {
-      command_queue = append_command_list(command_queue, cmds.commands[i]);
-    }
+    command_batch batch = create_command_batch(cmds);
+    queue = append_to_execution_queue(queue, batch);
     delete_command_list(cmds);
   }
   free(line);
