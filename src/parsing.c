@@ -1,4 +1,6 @@
 #include "header.h"
+#include <stdlib.h>
+#include <string.h>
 
 /***
  * Parsing inputs into Commands
@@ -26,33 +28,99 @@ void populate_command_queue() {
    * Output: Modifies the command_queue by adding the commands.
    *         Modifies the "stdin" by reading till it is empty.
    */
-  char *line = malloc(100 * sizeof(char));
-  while (fgets(line, 100, stdin) != NULL) {
-    Command cmd = parse_command(line);
-
-    // If there is not enough space to store another command allocate more
-    // memory for it.
-    if (command_queue.len >= command_queue.allocated_len) {
-      command_queue.allocated_len = command_queue.allocated_len * 2;
-      command_queue.commands =
-          realloc(command_queue.commands,
-                  sizeof(Command) * command_queue.allocated_len);
-    }
-    // Add command to the queue.
-    command_queue.commands[command_queue.len] = cmd;
-    command_queue.len += 1;
+  char *line = malloc(MAX_LINE_SIZE * sizeof(char));
+  while (fgets(line, MAX_LINE_SIZE, stdin) != NULL) {
+    command_list cmds = parse_line(line);
+    command_batch batch = create_command_batch(cmds);
+    queue = append_to_execution_queue(queue, batch);
+    delete_command_list(cmds);
   }
   free(line);
 }
 
-Command parse_command(char *line) {
+command_list parse_line(char *line) {
   /***
    * Parse a command into a "list" of arguments of type char**.
    * Allocates memory up to a bufsize.
    */
-  line[strcspn(line, "\n")] = 0;
-  int bufsize = 5; // The amount of pointers to allocate memory for.
-  int i = 0;       // The current words being handled.
+
+  // delete new line symbol breaks if newline not at the end of string..
+  line[strcspn(line, "\n")] = '\0';
+
+  command_list cmds = create_command_list();
+  split_line sl = split_on_symbol(line, '|');
+
+  for (int i = 0; i < sl.count; i++) {
+    Command cmd = parse_one_command(sl.splits[i]);
+    cmds = append_command_list(cmds, cmd);
+  }
+  delete_split_line(sl);
+
+  return cmds;
+}
+
+split_line create_split_line() {
+  char **splits = calloc(BUFFER_SIZE, sizeof(char *));
+  split_line sl = {splits, 0, BUFFER_SIZE};
+  return sl;
+}
+
+split_line append_split(split_line sl, char *token) {
+  if (sl.count == sl.allocated_size) {
+    sl.allocated_size = sl.allocated_size * 2;
+    sl.splits = realloc(sl.splits, sl.allocated_size);
+  }
+  sl.splits[sl.count] = token;
+  sl.count++;
+  return sl;
+}
+
+void delete_split_line(split_line sl) {
+  for (int i = 0; i < sl.count; i++) {
+    free(sl.splits[i]);
+  }
+  free(sl.splits);
+}
+
+split_line split_on_symbol(char *line, char sym) {
+  /***
+   * Implementing this without strtok
+   */
+
+  size_t string_len = 0;
+
+  while (1) {
+    // if reached end of string
+    if (line[string_len] == '\0') {
+      break;
+    }
+
+    string_len++;
+  }
+  size_t prev_token_pos = 0;
+
+  split_line sl = create_split_line();
+
+  for (int i = 0; i <= string_len; i++) {
+    if (line[i] == sym || i == string_len) {
+      line[i] = '\0';
+      int token_len = i - prev_token_pos;
+      char *token = malloc((token_len + 1) * sizeof(char));
+      strncpy(token, line + prev_token_pos, token_len + 1);
+      prev_token_pos = i + 1;
+
+      sl = append_split(sl, token);
+    }
+  }
+  return sl;
+}
+
+Command parse_one_command(char *line) {
+  // copy line so that the function
+  char *line_cpy = strdup(line);
+  int bufsize = BUFFER_SIZE; // The amount of pointers to allocate memory for.
+  // Parse one command from a string into a Command object.
+  int i = 0; // The index of the words being handled.
   char **args = malloc(sizeof(char *) *
                        bufsize); // Allocate the memory at inital bufsize.
 
@@ -61,15 +129,15 @@ Command parse_command(char *line) {
   enum redirection_types redirect_type = NONE;
 
   // Loop through each word using strtok
-  for (char *token = strtok(line, " "); token != NULL;
+  for (char *token = strtok(line_cpy, " "); token != NULL;
        token = strtok(NULL, " ")) {
     // If not enough memory has been allocated double the amount allocated.
     if (i + 1 <= bufsize) {
       bufsize = bufsize * 2;
       args = realloc(args, sizeof(char *) * bufsize);
     }
-    // Handle special characters ">" and ">>", each allowed to consume only one
-    // token a fd.
+    // Handle special characters ">" and ">>", each allowed to consume only
+    // one token a fd.
     if (strcmp(token, ">") == 0) {
       redirect_type = NORMAL;
       waiting_for_redirect_location = true;
@@ -87,10 +155,9 @@ Command parse_command(char *line) {
       i++;
     }
   }
-
   bool background = false;
-
   // If there is one or more arguments and the last is "&" run in background.
+
   if (i > 0 && strcmp(args[i - 1], "&") == 0) {
     background = true;
     i -= 1;
@@ -98,11 +165,10 @@ Command parse_command(char *line) {
   }
   args[i] = NULL;
 
-  Command cmd = {copy_string_array(args, i), i, background, redirect_location,
-                 NORMAL};
-
+  Command cmd = create_command(copy_string_array(args, i), i, background,
+                               redirect_location, NORMAL, false);
   free(args);
-
+  free(line_cpy);
   return cmd;
 }
 

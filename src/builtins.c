@@ -50,9 +50,8 @@ int builtin_exit(Command cmd) {
   /***
    * Builtin "exit" command.
    */
-  delete_command(cmd);
-  free_before_exit();
-  exit(0);
+  pending_exit = true;
+  return 1;
 }
 
 int builtin_help(Command cmd) {

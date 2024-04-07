@@ -13,6 +13,7 @@
 #define NUMBER_BUILTINS 3
 #define MAX_BACKGROUND 30
 #define MAX_LINE_SIZE 200
+// Used anytime memory is dynamically allocated.
 #define BUFFER_SIZE 10
 
 #define FONT_COLOUR_RESET "\x1b[0m"
@@ -31,6 +32,7 @@ struct command {
   bool background;
   char *redirection_file;
   enum redirection_types redirection_type;
+  bool piped;
 };
 typedef struct command Command;
 int run_command(Command cmd);
@@ -56,11 +58,36 @@ struct command_list_t {
   Command *commands;
   size_t allocated_len;
 };
-extern command_list command_queue;
-command_list create_command_queue();
+command_list create_command_list();
+command_list append_command_list(command_list cmd_lst, Command cmd);
 void delete_command_list(command_list cmd_lst);
 void populate_command_queue();
 Command get_next_command_from_queue();
+
+// Structure to store a series of commands that are to be piped to each other.
+struct command_batch_t {
+  command_list cmd_lst;
+  int **pipes;
+};
+typedef struct command_batch_t command_batch;
+command_batch create_command_batch(command_list cmd_lst);
+int run_command_batch(command_batch batch);
+void delete_command_batch(command_batch batch);
+
+struct execution_queue_t {
+  command_batch *batches;
+  // The number of batches
+  size_t len;
+  // The amount of memory allocated
+  size_t allocated_len;
+};
+typedef struct execution_queue_t execution_queue;
+extern execution_queue queue;
+execution_queue create_execution_queue();
+execution_queue append_to_execution_queue(execution_queue exe_q,
+                                          command_batch batch);
+void delete_execution_queue(execution_queue exe_q);
+command_batch get_next_batch_from_queue();
 
 extern built_in_func *builtins;
 built_in_func *create_builtins();
@@ -69,12 +96,29 @@ int main_loop();
 char *prompt();
 void free_before_exit();
 
-Command parse_command(char *line);
+struct split_line_t {
+  char **splits;
+  size_t count;
+  size_t allocated_size;
+};
+typedef struct split_line_t split_line;
+
+split_line split_on_symbol(char *line, char sym);
+split_line create_split_line();
+split_line append_split(split_line sl, char *token);
+void delete_split_line(split_line sl);
+
+command_list parse_line(char *line);
+Command parse_one_command(char *line);
 void delete_command(Command cmd);
+Command create_command(char **args, int arg_count, bool background,
+                       char *redirect_location,
+                       enum redirection_types redirect_type, bool piped);
 char **copy_string_array(char **source, int num_elements);
 
 // Builtins
 int builtin_cd(Command cmd);
+extern bool pending_exit;
 int builtin_exit(Command cmd);
 int builtin_help(Command cmd);
 
