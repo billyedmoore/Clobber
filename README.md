@@ -2,7 +2,7 @@
 
 ![Example command line usage.](images/terminal_screenshot.png)
 
-Simple unix shell. So named as clobber is a synonym of bash, how funny I know.
+Simple UNIX shell. So named as clobber is a synonym of bash, how funny I know.
 
 ## Features
 
@@ -13,10 +13,10 @@ Simple unix shell. So named as clobber is a synonym of bash, how funny I know.
 causes Clobber to exit.
 + Non-interactive mode, i.e. running commands from files using "clobber.out < "
 
-### Planned Features
+### Limitations
 
-+ Redirection with ">", ">>", "<" and "<<".
-+ Piping with "|".
++ No redirection (e.g command1 >> command2).
++ No piping from one process to another (e.g command1 | command2).
 
 ## Usage 
 
@@ -32,4 +32,3 @@ Run a script, where *SCRIPT_PATH* is the path of the script.
 ```
 $ ./clobber.out < SCRIPT_PATH
 ```
-
