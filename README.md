@@ -15,7 +15,7 @@ causes Clobber to exit.
 
 ### Limitations
 
-+ No redirection (e.g command1 >> command2).
++ No redirection (e.g command1 >> filename).
 + No piping from one process to another (e.g command1 | command2).
 
 ## Usage 
